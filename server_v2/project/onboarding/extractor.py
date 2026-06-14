@@ -1,32 +1,53 @@
 import json
 import re
-from onboarding.step_config import STEP_CONFIG
+from onboarding.step_config import EXTRACTION_SYSTEM_PROMPT
 
-def extract_for_step(step_key: str, user_message: str) -> dict:
-    """Calls LLM to extract the field for the current step."""
+def extract_json(text: str) -> str:
+    """Finds and extracts the first JSON block {...} from text."""
+    start = text.find('{')
+    end = text.rfind('}')
+    if start != -1 and end != -1 and end > start:
+        return text[start:end+1]
+    return text
+
+def extract_lead_fields(history_text: str) -> dict:
+    """Calls Groq to extract all lead fields from the conversation history."""
     from services.llm import get_llm
     from langchain_core.messages import SystemMessage, HumanMessage
-
-    config = STEP_CONFIG[step_key]
-    prompt = config["extraction_prompt"].format(message=user_message)
 
     try:
         llm = get_llm()
         response = llm.invoke([
-            SystemMessage(content="You are a precise data extraction assistant. Return only valid JSON."),
-            HumanMessage(content=prompt)
+            SystemMessage(content=EXTRACTION_SYSTEM_PROMPT),
+            HumanMessage(content=f"Extract lead details from the following conversation history:\n\n{history_text}")
         ])
         raw = response.content.strip()
 
-        # Strip markdown fences if model adds them
-        raw = re.sub(r"^```(?:json)?", "", raw, flags=re.MULTILINE)
-        raw = re.sub(r"```$", "", raw, flags=re.MULTILINE)
+        # Isolate JSON content
+        json_str = extract_json(raw)
+        
+        # Clean up any potential markdown fences
+        json_str = re.sub(r"^```(?:json)?", "", json_str, flags=re.MULTILINE)
+        json_str = re.sub(r"```$", "", json_str, flags=re.MULTILINE)
 
-        return json.loads(raw.strip())
+        parsed = json.loads(json_str.strip())
+        
+        # Normalize parsed output to guarantee all keys are present
+        normalized = {
+            "intent": parsed.get("intent"),
+            "location": parsed.get("location"),
+            "name": parsed.get("name"),
+            "amenities": parsed.get("amenities"),
+            "meeting_time": parsed.get("meeting_time")
+        }
+        return normalized
 
     except Exception as e:
         return {
-            "value": None,
-            "confidence": "low",
-            "raw_understood": f"extraction failed: {str(e)}"
+            "intent": None,
+            "location": None,
+            "name": None,
+            "amenities": None,
+            "meeting_time": None,
+            "error": str(e)
         }
