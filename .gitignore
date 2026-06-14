@@ -14,3 +14,6 @@ downloads/
 eggs/
 .eggs/
 .output.wav
+cache
+logs
+*.log

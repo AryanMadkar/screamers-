@@ -11,18 +11,14 @@ HF_TOKEN = os.getenv("HF_TOKEN")
 
 torch.set_num_threads(os.cpu_count())
 pipeline = KPipeline(
-    lang_code="a",
+    lang_code="h",
     repo_id="hexgrad/Kokoro-82M",
     device="cpu",
 )
 
 generator = pipeline(
-    """Hello everyone...
-
-Welcome to the future of artificial intelligence.
-
-Today, we are going to explore something truly fascinating.""",
-    voice="af_heart"
+    """नमस्कार दोस्तों। आज हम कृत्रिम बुद्धिमत्ता के भविष्य के बारे में बात करेंगे।""",
+    voice="hf_alpha"
 )
 chunks = []
 
@@ -31,4 +27,4 @@ for _, _, audio in generator:
 
 final_audio = np.concatenate(chunks)
 
-sf.write("output.wav", final_audio, 24000)
+sf.write("houtput.wav", final_audio, 24000)
