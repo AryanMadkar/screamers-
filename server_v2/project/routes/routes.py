@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from services.chat_service import chat  # FIX: was using generate_response directly, bypassing all service logic
+from services.chat_service import ChatService  # FIX: was using generate_response directly, bypassing all service logic
 
 
 def register_routes(app):
@@ -23,5 +23,5 @@ def register_routes(app):
         user_id = data.get("user_id")          # optional — None triggers new user creation
         conversation_id = data.get("conversation_id")  # optional — None triggers new conversation
 
-        result = chat(user_id, conversation_id, user_message)
+        result = ChatService.chat(user_id, conversation_id, user_message)
         return jsonify(result)

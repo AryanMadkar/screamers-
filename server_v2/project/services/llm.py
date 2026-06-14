@@ -1,28 +1,37 @@
-from langchain_ollama import ChatOllama
+import os
+from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
 
 llm = None
-
 
 def get_llm():
     global llm
 
     if llm is None:
-        llm = ChatOllama(
-            model="phi3",
+        # Get config from env/dotenv
+        api_key = os.getenv("GROQ_API_KEY")
+        model = os.getenv("GROQ_MODEL", "llama3-8b-8192")
+
+        # Strip optional wrapping quotes from .env value
+        if api_key:
+            api_key = api_key.strip('"\'')
+
+        if not api_key or api_key == "your_groq_api_key_here":
+            raise ValueError(
+                "GROQ_API_KEY is not configured! Please open your '.env' file and "
+                "set your real Groq API key in the GROQ_API_KEY field."
+            )
+
+        llm = ChatGroq(
+            model=model,
             temperature=0.9,
-            top_p=0.9,              # nucleus sampling
-            top_k=40,               # limits token choices
-            num_predict=256,        # max tokens to generate (keep low for speed)
-            num_ctx=2048,           # context window (lower = faster)
-            repeat_penalty=1.1
+            api_key=api_key
         )
 
     return llm
 
 
 def generate_response(user_message):
-
     llm = get_llm()
 
     messages = [
@@ -43,5 +52,4 @@ Rules:
     ]
 
     response = llm.invoke(messages)
-
     return response.content

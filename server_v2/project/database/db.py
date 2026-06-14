@@ -8,6 +8,7 @@ db = client[Config.DB_NAME]
 users_collection = db['users']
 conversations_collection = db['conversations']
 message_collection = db['messages']
+lead_collection = db['leads']
 
 
 def create_indexes():
@@ -20,3 +21,8 @@ def create_indexes():
         [("conversation_id", 1), ("timestamp", 1)]
     )
     message_collection.create_index("user_id")
+    
+    lead_collection.create_index("conversation_id", unique=True)
+    lead_collection.create_index("user_id")
+
+    db['extraction_logs'].create_index("conversation_id")
