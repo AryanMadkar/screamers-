@@ -4,3 +4,5 @@ langchain
 langchain-ollama
 pymongo          # FIX: was missing — used in db.py
 langchain-groq
+langchain-community
+tavily-python
