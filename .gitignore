@@ -1,0 +1,16 @@
+venv
+.ENV
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+.output.wav
