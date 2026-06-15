@@ -1,12 +1,15 @@
 import threading
 import time
+
 from services.session_service import call_manager
 from services.audio_queue_service import AudioQueueService
+from pipeline.pipeline_executor import PipelineExecutor
 
 class WorkerService:
     def __init__(self):
         self.running = False
         self.thread = None
+        self.pipeline = PipelineExecutor()
         
     def start(self):
         try:
@@ -15,12 +18,13 @@ class WorkerService:
                 return
             
             self.running = True
-            self.thread = threading.Thread(target=self.run)
+            self.thread = threading.Thread(target=self.run_forever, daemon=True)
             self.thread.start()
             print("Worker started.")
         except Exception as e:
             print(f"Error starting worker: {e}")
             return
+
     def stop(self):
         try:
             if not self.running:
@@ -34,6 +38,7 @@ class WorkerService:
         except Exception as e:
             print(f"Error stopping worker: {e}")
             return
+
     def run_forever(self):
         try:
             while self.running:
@@ -41,26 +46,25 @@ class WorkerService:
                 for session in calls:
                     if not session.active:
                         continue
-                    if session.processing:
+                    if getattr(session, 'processing', False):
                         continue
                     if AudioQueueService.is_empty(session):
                         continue
+                        
                     session.processing = True
                     chunk = AudioQueueService.pop(session)
                     if chunk is None:
                         session.processing = False
                         continue
+                        
                     session.current_chunk = chunk
-                    #
-                    # Future STT goes here
-                    #
-
-                    #
-                    # Future LangGraph goes here
-                    #
+                    
+                    # Process the chunk through the pipeline
+                    self.pipeline.execute(session)
+                    
                     chunk.mark_processed()
                     session.processing = False
-                    time.sleep(0.1)  # Sleep briefly to prevent tight loop
+                    
+                time.sleep(0.1)  # Sleep briefly to prevent high CPU usage in empty loop
         except Exception as e:
             print(f"Error in worker loop: {e}")
-            return

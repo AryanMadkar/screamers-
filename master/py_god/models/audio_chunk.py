@@ -17,6 +17,6 @@ class AudioChunk:
         if os.path.getsize(self.file_path) == 0:
             return False
         return True
-    
+
     def mark_processed(self):
         self.processed = True

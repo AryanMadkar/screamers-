@@ -11,9 +11,9 @@ class CallSession:
         self.current_text = ""
         self.ai_response = ""
         self.active = True
+        self.processing = False
         self.memory = {}
         self.context = ""
-        self.processing = False
         
     def to_dict(self):
         return {
