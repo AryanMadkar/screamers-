@@ -23,8 +23,8 @@ class CallManager:
     def end_call(self, call_id):
         try:
             if call_id in self.calls:
+                # Mark as ended — do NOT delete so /status can still return ENDED state
                 self.calls[call_id].end_call()
-                del self.calls[call_id]
                 return True
             return False
         except Exception as e:

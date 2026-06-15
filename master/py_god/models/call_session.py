@@ -1,6 +1,6 @@
 import uuid
 from models.conversation import Conversation
-
+from models.call_state import CallState
 class CallSession:
     def __init__(self):
         self.call_id = str(uuid.uuid4())
@@ -14,6 +14,7 @@ class CallSession:
         self.processing = False
         self.memory = {}
         self.context = ""
+        self.state = CallState.IDLE
         
     def to_dict(self):
         return {
@@ -25,7 +26,26 @@ class CallSession:
             'memory': self.memory,
             'context': self.context,
             'messages': self.conversation.get_messages(),
+            'state': self.state.value
         }
         
     def end_call(self):
         self.active = False
+        self.set_state(CallState.ENDED)
+        
+        
+    def set_state(self, new_state):
+        self.state = new_state
+    
+    def is_idle(self):
+        return self.state == CallState.IDLE
+    def is_listening(self):
+        return self.state == CallState.LISTENING
+    def is_transcribing(self):
+        return self.state == CallState.TRANSCRIBING
+    def is_thinking(self):
+        return self.state == CallState.THINKING
+    def is_speaking(self):
+        return self.state == CallState.SPEAKING
+    def is_ended(self):
+        return self.state == CallState.ENDED
