@@ -18,16 +18,19 @@ def start():
 
         # Save temporarily
         temp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+        
         temp.close()  # Close the file so that it can be written to on Windows
         audio.save(temp.name)
-
         print(temp.name)
 
         conversation_id = ConversationManager.create_conversation()
 
         state = {
             "conversation_id": conversation_id,
+            "messages": [],
+            "language": "unknown",
             "audio_path": temp.name,
+            "current_text": "",
             "text": ""
         }
 
@@ -37,7 +40,8 @@ def start():
 
         return jsonify({
             "conversation_id": conversation_id,
-            "text": result["text"]
+            "message": result["messages"],
+            "language": result["language"]
         })
     except Exception as e:
 
