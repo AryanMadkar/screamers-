@@ -2,29 +2,30 @@ import threading
 import time
 
 from models.call_state import CallState
+from services.audio_service import AudioService
 from services.session_service import call_manager
 from services.audio_queue_service import AudioQueueService
 from pipeline.pipeline_executor import PipelineExecutor
+
 
 class WorkerService:
     def __init__(self):
         self.running = False
         self.thread = None
         self.pipeline = PipelineExecutor()
-        
+
     def start(self):
         try:
             if self.running:
                 print("Worker is already running.")
                 return
-            
+
             self.running = True
             self.thread = threading.Thread(target=self.run_forever, daemon=True)
             self.thread.start()
             print("Worker started.")
         except Exception as e:
             print(f"Error starting worker: {e}")
-            return
 
     def stop(self):
         try:
@@ -38,13 +39,31 @@ class WorkerService:
             print("Worker stopped.")
         except Exception as e:
             print(f"Error stopping worker: {e}")
-            return
 
     def run_forever(self):
+        """
+        Background loop — polls all active sessions for queued audio chunks.
+
+        Per-chunk flow (Steps 8 & 10):
+            1. Pop chunk from queue
+            2. Assign to session.current_chunk
+            3. Run PipelineExecutor.execute()
+               └─ STTStage   : transcribe → current_text, current_transcript,
+                                conversation.add_user(), cleanup temp file
+               └─ MemoryStage  : (placeholder)
+               └─ ContextStage : (placeholder)
+               └─ AIStage      : (placeholder)
+               └─ TTSStage     : (placeholder)
+            4. mark_processed()
+            5. Ensure temp file is cleaned up (double-safety if STT failed mid-way)
+            6. session.current_chunk = None
+            7. state → IDLE
+        """
         while self.running:
             try:
                 calls = list(call_manager.calls.values())
                 for session in calls:
+                    # Only pick up sessions ready for processing
                     if not session.is_listening():
                         continue
                     if not session.active:
@@ -54,42 +73,44 @@ class WorkerService:
                     if AudioQueueService.is_empty(session):
                         continue
 
-                    session.processing = True
                     chunk = AudioQueueService.pop(session)
                     if chunk is None:
-                        session.processing = False
                         continue
 
                     session.current_chunk = chunk
+                    session.processing = True
 
                     try:
-                        # Phase 1: Transcribe audio -> text
+                        # Steps 8 & 9: run the full pipeline
+                        # STTStage internally handles TRANSCRIBING state + cleanup.
+                        # Worker sets THINKING / SPEAKING at the right moments.
                         session.set_state(CallState.TRANSCRIBING)
-                        self.pipeline.stt.process(session)
+                        self.pipeline.execute(session)
 
-                        # Phase 2: Build memory + context, then call AI
-                        session.set_state(CallState.THINKING)
-                        self.pipeline.memory.process(session)
-                        self.pipeline.context.process(session)
-                        self.pipeline.ai.process(session)
-
-                        # Phase 3: Synthesize AI response to audio
-                        session.set_state(CallState.SPEAKING)
-                        self.pipeline.tts.process(session)
-
+                        # Pipeline completed successfully
                         chunk.mark_processed()
 
                     except Exception as e:
-                        print(f"Error processing chunk for call {session.call_id}: {e}")
-                        # On error, return to LISTENING so the next chunk can still be processed
+                        print(f"[Worker] Error processing chunk {chunk.chunk_id} "
+                              f"for call {session.call_id}: {e}")
+                        # Return to LISTENING so the session can still accept the next chunk
                         session.set_state(CallState.LISTENING)
+
                     finally:
+                        # Step 8: clean up temp file regardless of success/failure
+                        # (STTStage already does this on success; this is a safety net)
+                        AudioService.cleanup_chunk(chunk)
+
+                        # Step 8: clear current_chunk pointer
+                        session.current_chunk = None
+
                         session.processing = False
-                        # Only reset to IDLE if we finished successfully (not already overridden)
-                        if session.state != CallState.LISTENING:
+
+                        # Step 8: advance to IDLE only if we didn't roll back to LISTENING
+                        if session.state not in (CallState.LISTENING, CallState.ENDED):
                             session.set_state(CallState.IDLE)
 
             except Exception as e:
-                print(f"Error in worker loop: {e}")
+                print(f"[Worker] Unexpected error in main loop: {e}")
 
-            time.sleep(0.1)  # Sleep briefly to prevent high CPU usage in empty loop
+            time.sleep(0.1)  # Prevent busy-wait / high CPU usage

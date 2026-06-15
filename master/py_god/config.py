@@ -25,6 +25,9 @@ class Config:
         "whisper-large-v3"
     )
 
+    # Alias used by GroqSTT — same value, kept separate so renaming one doesn't break the other
+    GROQ_MODEL = MODEL_NAME
+
     TEMP_FOLDER = os.getenv(
         "TEMP_FOLDER",
         "./temp"
