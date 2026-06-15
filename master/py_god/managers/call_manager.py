@@ -6,7 +6,7 @@ class CallManager:
         self.calls = {}
     def create_call(self):
         try:
-            call = CallSession(caller_id=None, callee_id=None)
+            call = CallSession()
             self.calls[call.call_id] = call
             return call
         except Exception as e:

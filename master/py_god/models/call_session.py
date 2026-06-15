@@ -1,21 +1,27 @@
 import uuid
 from models.conversation import Conversation
+
 class CallSession:
-    def __init__(self, caller_id, callee_id):
+    def __init__(self):
         self.call_id = str(uuid.uuid4())
-        self.language = 'unknown'
         self.conversation = Conversation()
+        self.language = 'unknown'
+        self.current_chunk = None
+        self.current_text = ""
+        self.ai_response = ""
         self.active = True
-        self.context = ""
         self.memory = {}
-        self.user_text = ""
-        self.ai_text = ""
+        self.context = ""
         
     def to_dict(self):
         return {
             'call_id': self.call_id,
             'language': self.language,
+            'current_text': self.current_text,
+            'ai_response': self.ai_response,
             'active': self.active,
+            'memory': self.memory,
+            'context': self.context,
             'messages': self.conversation.get_messages(),
         }
         

@@ -1,41 +1,29 @@
 from services.stt_service import STTService
-
+from models.call_session import CallSession
 
 stt = STTService()
 
-
-def speech_to_text_node(state):
-
+def speech_to_text_node(state: CallSession):
     try:
-        text = stt.transcribe(state["audio_path"])
-
-        state["messages"].append({
-            "role": "user",
-            "content": text
-        })
-
-        state["current_text"] = text
-
+        if not state.current_chunk or not state.current_chunk.file_path:
+            raise Exception("No current audio chunk file path available in state")
+            
+        text = stt.transcribe(state.current_chunk.file_path)
+        state.conversation.add_user(text)
+        state.current_text = text
         return state
-
     except Exception as e:
-        raise Exception(
-            f"Error in speech_to_text_node: {e}"
-        )
+        raise Exception(f"Error in speech_to_text_node: {e}")
     
-    
-def language_detection_node(state):
+def language_detection_node(state: CallSession):
     try:
-        text = state["current_text"].strip().lower()
+        text = state.current_text.strip().lower()
         if "hindi" in text or "हिंदी" in text:
-            state["language"] = "hindi"
-
+            state.language = "hindi"
         elif "english" in text:
-            state["language"] = "english"
-
+            state.language = "english"
         else:
-            state["language"] = "unknown"
-
+            state.language = "unknown"
         return state
     except Exception as e:
         raise Exception(f"Error in language_detection_node: {str(e)}")

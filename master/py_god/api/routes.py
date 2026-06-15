@@ -1,18 +1,19 @@
 from flask import Blueprint, request, jsonify
 from services.call_service import CallService
 
+router = Blueprint('router', __name__, url_prefix='/api')
 
-call_router = Blueprint('call_router', __name__)
-
-@call_router.route('/call/start', methods=['POST'])
+@router.route('/call/start', methods=['POST'])
 def call_start():
     try:
         call_data = CallService.start_call()
+        if not call_data:
+            return jsonify({'error': 'Failed to start call'}), 500
         return jsonify(call_data), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@call_router.route('/call/end', methods=['POST'])
+@router.route('/call/end', methods=['POST'])
 def call_end():
     try:
         data = request.get_json(silent=True) or {}
@@ -26,7 +27,7 @@ def call_end():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@call_router.route('/call/status/<call_id>', methods=['GET'])
+@router.route('/call/status/<call_id>', methods=['GET'])
 def call_status(call_id):
     try:
         call = CallService.get_call(call_id)
@@ -34,5 +35,26 @@ def call_status(call_id):
             return jsonify(call.to_dict()), 200
         else:
             return jsonify({'error': 'Call not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@router.route('/call/audio', methods=['POST'])
+def call_audio():
+    try:
+        call_id = request.form.get('call_id')
+        if not call_id:
+            return jsonify({'error': 'call_id is required'}), 400
+            
+        if 'audio' not in request.files:
+            return jsonify({'error': 'audio file is required'}), 400
+            
+        audio_file = request.files['audio']
+        audio_data = audio_file.read()
+        
+        call_session = CallService.process_audio(call_id, audio_data)
+        if not call_session:
+            return jsonify({'error': 'Call not found'}), 404
+            
+        return jsonify(call_session.to_dict()), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500

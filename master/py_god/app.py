@@ -1,8 +1,8 @@
 from flask import Flask
-from api.routes import call_router
+from api.routes import router
 
 app = Flask(__name__)
-app.register_blueprint(call_router, url_prefix='/api')
+app.register_blueprint(router)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8000, threaded=True)
