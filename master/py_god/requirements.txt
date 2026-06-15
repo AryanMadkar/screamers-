@@ -1,0 +1,5 @@
+flask
+langgraph
+langchain-core
+groq
+python-dotenv

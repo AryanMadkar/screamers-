@@ -62,6 +62,8 @@ def handle_onboarding(conversation_id: str, user_id: str, user_message: str):
     # ── Explicit Cancel/Stop check ──
     if clean_msg in ("stop", "cancel", "nevermind", "exit"):
         update_lead(conversation_id, {"onboarding_step": "abandoned"})
+        from database.conversation_model import end_conversation
+        end_conversation(conversation_id)
         disengage_msg = (
             "No worries! I've paused our chat. If you change your mind and want to find a property "
             "later, just type 'restart' or 'start over' anytime. Have a great day!"
@@ -156,6 +158,8 @@ def handle_onboarding(conversation_id: str, user_id: str, user_message: str):
             "onboarding_step": "abandoned",
             "clarification_retries": retries
         })
+        from database.conversation_model import end_conversation
+        end_conversation(conversation_id)
         disengage_msg = (
             "I see we're having some trouble getting the details for this step. "
             "To avoid taking up more of your time, I'll stop here. "

@@ -79,7 +79,8 @@ def generate_response(user_message, lead: dict = None):
         "- Use the search results to answer. Show 2-3 listings with their name, price, location, and source/link if available.\n"
         "- If search returns no results, tell the user you couldn't find web listings and will consult your offline brokers.\n"
         "- Keep your response concise (usually 2-4 sentences or a brief list) and ask a single helpful follow-up question.\n"
-        "- Do not mention tool calling or technical details to the user."
+        "- Do not mention tool calling or technical details to the user.\n"
+        "- CRITICAL: If the user indicates they want to end the conversation, say goodbye, thank you, or wrap up, reply politely and append the tag '[END_CONVERSATION]' (include the square brackets) at the very end of your response."
     )
 
     # Bind tools

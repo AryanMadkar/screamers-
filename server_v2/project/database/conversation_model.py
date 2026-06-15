@@ -30,3 +30,11 @@ def increment_conversation_count(conversation_id):
         {"conversation_id": conversation_id},
         {"$inc": {"total_messages": 1}}
     )
+
+
+def end_conversation(conversation_id):
+    conversations_collection.update_one(
+        {"conversation_id": conversation_id},
+        {"$set": {"status": "ended", "ended_at": datetime.utcnow()}}
+    )
+
