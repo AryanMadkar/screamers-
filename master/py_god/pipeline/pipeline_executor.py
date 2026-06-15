@@ -1,3 +1,4 @@
+from pipeline.stages.decision_stage import DecisionStage
 from models.call_state import CallState
 from pipeline.stages.stt_stage import STTStage
 from pipeline.stages.memory_stage import MemoryStage
@@ -10,6 +11,7 @@ class PipelineExecutor:
     def __init__(self):
         self.stt = STTStage()
         self.memory = MemoryStage()
+        self.decision = DecisionStage()
         self.context = ContextStage()
         self.ai = AIStage()
         self.tts = TTSStage()
@@ -23,7 +25,8 @@ class PipelineExecutor:
               └─ STTStage        : transcribe audio → text
             THINKING      (set here before AI phases)
               └─ MemoryStage     : enrich session memory
-              └─ ContextStage    : build context string
+              └─ DecisionStage   : decide next action (ASK/SEARCH/END)
+              └─ ContextStage    : build context string (skipped if not ASK)
               └─ AIStage         : generate AI response
             SPEAKING      (set here before TTS)
               └─ TTSStage        : synthesise speech
@@ -38,6 +41,7 @@ class PipelineExecutor:
         # Phase 2 — THINKING: memory retrieval, context building, AI inference
         session.set_state(CallState.THINKING)
         session = self.memory.process(session)
+        session = self.decision.process(session)
         session = self.context.process(session)
         session = self.ai.process(session)
 

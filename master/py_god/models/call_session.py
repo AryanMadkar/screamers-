@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from models.conversation import Conversation
 from models.call_state import CallState
-
+from models.real_estate import RealEstateMemory
 
 class CallSession:
     def __init__(self):
@@ -23,7 +23,8 @@ class CallSession:
         self.ai_response = ""
         self.active = True
         self.processing = False
-        self.memory = {}
+        self.memory = RealEstateMemory()
+        self.next_action = None
         self.context = ""
         self.state = CallState.IDLE
 
@@ -35,7 +36,7 @@ class CallSession:
             'current_transcript': self.current_transcript,
             'ai_response': self.ai_response,
             'active': self.active,
-            'memory': self.memory,
+            'memory': self.memory.to_dict(),
             'context': self.context,
             'messages': self.conversation.get_messages(),
             'state': self.state.value,
