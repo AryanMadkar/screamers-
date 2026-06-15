@@ -17,4 +17,3 @@ eggs/
 cache
 logs
 *.log
-models/
