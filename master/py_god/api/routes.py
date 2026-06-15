@@ -56,6 +56,8 @@ def call_audio():
             call = CallService.get_call(call_id)
             if not call:
                 return jsonify({'error': 'Call not found'}), 404
+            if not call.active:
+                return jsonify({'error': 'Call is inactive'}), 400
             return jsonify({'error': 'Invalid audio chunk'}), 400
             
         return jsonify({'status': 'accepted'}), 202

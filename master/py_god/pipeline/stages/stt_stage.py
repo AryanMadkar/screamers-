@@ -26,7 +26,7 @@ class STTStage:
         # --- Transcribe ---
         text = self.stt.transcribe(session.current_chunk.file_path)
         # GroqSTT returns "" on error — treat it as a failure so we don't save blank messages
-        if not text:
+        if not text or not text.strip():
             raise RuntimeError("STT returned empty transcription — skipping chunk")
 
         # --- Step 6: Store text in session ---

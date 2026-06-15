@@ -14,4 +14,6 @@ class AIStage:
         else:
             call_session.ai_response = "I'm sorry, I didn't understand that."
 
+        call_session.conversation.add_ai(call_session.ai_response)
+
         return call_session

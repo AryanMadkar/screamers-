@@ -21,7 +21,7 @@ class CallService:
     @staticmethod
     def receive_audio(call_id, audio_data: bytes) -> bool:
         call_session = call_manager.get_call(call_id)
-        if not call_session:
+        if not call_session or not call_session.active:
             return False
 
         # 1. Save temp file and create AudioChunk
