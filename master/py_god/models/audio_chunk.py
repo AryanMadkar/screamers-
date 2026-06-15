@@ -1,4 +1,5 @@
 import uuid
+import os
 
 class AudioChunk:
     def __init__(self, data: bytes, format: str = "wav"):
@@ -6,3 +7,12 @@ class AudioChunk:
         self.data = data
         self.format = format
         self.file_path = None
+
+    def validate(self) -> bool:
+        if not self.file_path:
+            return False
+        if not os.path.exists(self.file_path):
+            return False
+        if os.path.getsize(self.file_path) == 0:
+            return False
+        return True

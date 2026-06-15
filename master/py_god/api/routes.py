@@ -37,7 +37,6 @@ def call_status(call_id):
             return jsonify({'error': 'Call not found'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 @router.route('/call/audio', methods=['POST'])
 def call_audio():
     try:
@@ -51,10 +50,14 @@ def call_audio():
         audio_file = request.files['audio']
         audio_data = audio_file.read()
         
-        call_session = CallService.process_audio(call_id, audio_data)
-        if not call_session:
-            return jsonify({'error': 'Call not found'}), 404
+        success = CallService.receive_audio(call_id, audio_data)
+        if not success:
+            # Check if call exists or if validation failed
+            call = CallService.get_call(call_id)
+            if not call:
+                return jsonify({'error': 'Call not found'}), 404
+            return jsonify({'error': 'Invalid audio chunk'}), 400
             
-        return jsonify(call_session.to_dict()), 200
+        return jsonify({'status': 'accepted'}), 202
     except Exception as e:
         return jsonify({'error': str(e)}), 500

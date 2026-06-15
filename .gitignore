@@ -17,3 +17,4 @@ eggs/
 cache
 logs
 *.log
+temp

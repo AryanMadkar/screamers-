@@ -6,32 +6,27 @@ voice_ai/
 ├── config.py
 │
 ├── api/
-│   ├── routes.py
+│   └── routes.py
 │
-├── graph/
-│   ├── builder.py
-│   ├── state.py
-│   └── nodes/
+├── models/
+│   ├── call_session.py
+│   ├── conversation.py
+│   ├── message.py
+│   └── audio_chunk.py
+│
+├── managers/
+│   └── call_manager.py
 │
 ├── services/
 │   ├── call_service.py
-│   ├── conversation_service.py
 │   ├── session_service.py
-│   ├── stt_service.py
-│   ├── llm_service.py
-│   ├── tts_service.py
-│   └── memory_service.py
+│   ├── audio_service.py
+│   └── audio_queue_service.py
 │
-├── managers/
-│   ├── call_manager.py
-│   ├── conversation_manager.py
-│
-├── models/
-│   ├── voice_state.py
+├── graph/
 │
 ├── database/
-│   ├── mongodb.py
 │
 ├── temp/
 │
-└── utils/
+└── requirements.txt

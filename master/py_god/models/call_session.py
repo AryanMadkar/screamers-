@@ -7,6 +7,7 @@ class CallSession:
         self.conversation = Conversation()
         self.language = 'unknown'
         self.current_chunk = None
+        self.chunk_queue = []
         self.current_text = ""
         self.ai_response = ""
         self.active = True
