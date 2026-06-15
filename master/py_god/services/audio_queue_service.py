@@ -15,3 +15,7 @@ class AudioQueueService:
     @staticmethod
     def size(call_session):
         return len(call_session.chunk_queue)
+    
+    @staticmethod
+    def is_empty(call_session):
+        return len(call_session.chunk_queue) == 0

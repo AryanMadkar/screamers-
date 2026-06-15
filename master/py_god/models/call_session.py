@@ -13,6 +13,7 @@ class CallSession:
         self.active = True
         self.memory = {}
         self.context = ""
+        self.processing = False
         
     def to_dict(self):
         return {

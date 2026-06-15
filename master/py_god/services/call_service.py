@@ -1,7 +1,7 @@
 from services.session_service import call_manager
 from services.audio_service import AudioService
 from graph.graph_builder import graph
-
+from services.audio_queue_service import AudioQueueService
 class CallService:
     @staticmethod
     def start_call():
@@ -52,6 +52,6 @@ class CallService:
         call_session.current_chunk = chunk
         
         # 4. Push into CallSession.chunk_queue
-        call_session.chunk_queue.append(chunk)
+        AudioQueueService.push(call_session, chunk)
         
         return True

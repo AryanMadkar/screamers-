@@ -7,6 +7,7 @@ class AudioChunk:
         self.data = data
         self.format = format
         self.file_path = None
+        self.processed = False
 
     def validate(self) -> bool:
         if not self.file_path:
@@ -16,3 +17,6 @@ class AudioChunk:
         if os.path.getsize(self.file_path) == 0:
             return False
         return True
+    
+    def mark_processed(self):
+        self.processed = True
