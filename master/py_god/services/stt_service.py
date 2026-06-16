@@ -14,7 +14,7 @@ class STTService:
                 
             with open(audio_path, "rb") as file:
 
-                transcription = self.client.audio.translations.create(
+                transcription = self.client.audio.transcriptions.create(
                     file=file,
                     model=Config.MODEL_NAME
                 )

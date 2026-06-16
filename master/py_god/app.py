@@ -1,3 +1,11 @@
+import sys
+import io
+# Force UTF-8 output so Hindi/emoji strings never crash on Windows cp1252 terminals
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+
 from flask import Flask
 from api.routes import router
 from worker.worker_service import WorkerService

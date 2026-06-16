@@ -32,3 +32,18 @@ class Config:
         "TEMP_FOLDER",
         "./temp"
     )
+
+    MONGO_URI = os.getenv(
+        "MONGO_URI",
+        "mongodb://localhost:27017/screem"
+    )
+
+    DB_NAME = os.getenv(
+        "DB_NAME",
+        "screem"
+    )
+
+    LLM_MODEL = os.getenv(
+        "LLM_MODEL",
+        "llama-3.3-70b-versatile"
+    )

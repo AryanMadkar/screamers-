@@ -6,8 +6,11 @@ from services.audio_queue_service import AudioQueueService
 
 class CallService:
     @staticmethod
-    def start_call():
+    def start_call(language: str = "english"):
         call = call_manager.create_call()
+        if call:
+            lang = language.lower().strip()
+            call.preferred_language = lang if lang in ("english", "hindi") else "english"
         return call.to_dict() if call else None
 
     @staticmethod

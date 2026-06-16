@@ -17,7 +17,7 @@ class GroqSTT(BaseSTT):
                        cannot tell whether STT failed or the audio was genuinely silent.
         """
         with open(audio_file_path, 'rb') as audio_file:
-            transcription = self.groq.audio.translations.create(
+            transcription = self.groq.audio.transcriptions.create(
                 file=audio_file,
                 model=Config.GROQ_MODEL,
             )

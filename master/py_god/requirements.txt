@@ -3,3 +3,4 @@ langgraph
 langchain-core
 groq
 python-dotenv
+pymongo
